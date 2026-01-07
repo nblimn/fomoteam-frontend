@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Container,
+  Box,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { Product, CreateProductDto, UpdateProductDto } from './types/Product';
 import { productService } from './services/productService';
 import ProductList from './components/ProductList';
 import ProductForm from './components/ProductForm';
 import DeleteConfirmation from './components/DeleteConfirmation';
-import { FiPlus } from 'react-icons/fi';
-import './App.css';
+import { theme } from './theme';
 
 interface Toast {
   message: string;
@@ -26,14 +37,6 @@ function App() {
   useEffect(() => {
     fetchProducts();
   }, []);
-
-  // Auto-hide toast after 3 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
 
   const fetchProducts = async () => {
     try {
@@ -118,57 +121,93 @@ function App() {
     setToast({ message, type });
   };
 
+  const handleCloseToast = () => {
+    setToast(null);
+  };
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <div className="header-title">
-            <div>
-              <h1>Product Management</h1>
-              <p className="header-subtitle">Manage your product inventory</p>
-            </div>
-          </div>
-          <button className="btn btn-primary btn-icon" onClick={() => setShowForm(true)}>
-            <FiPlus />
-            <span>Add Product</span>
-          </button>
-        </div>
-      </header>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <AppBar
+          position="static"
+          elevation={0}
+          sx={{
+            bgcolor: 'rgba(19, 24, 37, 0.8)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <Toolbar>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h5" component="h1" fontWeight={600}>
+                Product Management
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Manage your product inventory
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setShowForm(true)}
+              sx={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                },
+              }}
+            >
+              Add Product
+            </Button>
+          </Toolbar>
+        </AppBar>
 
-      <main className="app-main">
-        <ProductList
-          products={products}
-          loading={loading}
-          error={error}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onRetry={fetchProducts}
-        />
-      </main>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <ProductList
+            products={products}
+            loading={loading}
+            error={error}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+            onRetry={fetchProducts}
+          />
+        </Container>
 
-      {showForm && (
-        <ProductForm
-          product={selectedProduct}
-          onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
-          onClose={handleCloseForm}
-        />
-      )}
+        {showForm && (
+          <ProductForm
+            product={selectedProduct}
+            onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
+            onClose={handleCloseForm}
+          />
+        )}
 
-      {productToDelete && (
-        <DeleteConfirmation
-          product={productToDelete}
-          onConfirm={handleDeleteProduct}
-          onCancel={handleCancelDelete}
-          isDeleting={isDeleting}
-        />
-      )}
+        {productToDelete && (
+          <DeleteConfirmation
+            product={productToDelete}
+            onConfirm={handleDeleteProduct}
+            onCancel={handleCancelDelete}
+            isDeleting={isDeleting}
+          />
+        )}
 
-      {toast && (
-        <div className={`toast ${toast.type}`}>
-          <span className="toast-message">{toast.message}</span>
-        </div>
-      )}
-    </div>
+        <Snackbar
+          open={!!toast}
+          autoHideDuration={3000}
+          onClose={handleCloseToast}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleCloseToast}
+            severity={toast?.type}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {toast?.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </ThemeProvider>
   );
 }
 

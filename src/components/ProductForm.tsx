@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Product, CreateProductDto, UpdateProductDto } from '../types/Product';
-import { FiX } from 'react-icons/fi';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Button,
+    IconButton,
+    Grid,
+    CircularProgress,
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 
 interface ProductFormProps {
     product?: Product;
@@ -95,106 +106,102 @@ export default function ProductForm({ product, onSubmit, onClose }: ProductFormP
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h2>{product ? 'Edit Product' : 'Add New Product'}</h2>
-                    <button className="btn-close" onClick={onClose}>
-                        <FiX />
-                    </button>
-                </div>
+        <Dialog
+            open={true}
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    backgroundImage: 'none',
+                },
+            }}
+        >
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {product ? 'Edit Product' : 'Add New Product'}
+                <IconButton onClick={onClose} size="small">
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
 
-                <form onSubmit={handleSubmit} className="product-form">
-                    <div className="form-group">
-                        <label htmlFor="name">
-                            Product Name <span className="required">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            className={errors.name ? 'error' : ''}
-                            placeholder="Enter product name"
-                            maxLength={200}
-                        />
-                        {errors.name && <span className="error-message">{errors.name}</span>}
-                    </div>
+            <form onSubmit={handleSubmit}>
+                <DialogContent dividers>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Product Name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                error={!!errors.name}
+                                helperText={errors.name}
+                                required
+                                inputProps={{ maxLength: 200 }}
+                            />
+                        </Grid>
 
-                    <div className="form-group">
-                        <label htmlFor="description">Description</label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className={errors.description ? 'error' : ''}
-                            placeholder="Enter product description (optional)"
-                            rows={4}
-                            maxLength={1000}
-                        />
-                        {errors.description && (
-                            <span className="error-message">{errors.description}</span>
-                        )}
-                    </div>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Description"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                error={!!errors.description}
+                                helperText={errors.description}
+                                multiline
+                                rows={4}
+                                inputProps={{ maxLength: 1000 }}
+                            />
+                        </Grid>
 
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="price">
-                                Price <span className="required">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                id="price"
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Price"
                                 name="price"
+                                type="number"
                                 value={formData.price}
                                 onChange={handleChange}
-                                className={errors.price ? 'error' : ''}
-                                placeholder="0.00"
-                                step="0.01"
-                                min="0.01"
+                                error={!!errors.price}
+                                helperText={errors.price}
+                                required
+                                inputProps={{ step: '0.01', min: '0.01' }}
                             />
-                            {errors.price && <span className="error-message">{errors.price}</span>}
-                        </div>
+                        </Grid>
 
-                        <div className="form-group">
-                            <label htmlFor="stock">
-                                Stock <span className="required">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                id="stock"
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Stock"
                                 name="stock"
+                                type="number"
                                 value={formData.stock}
                                 onChange={handleChange}
-                                className={errors.stock ? 'error' : ''}
-                                placeholder="0"
-                                min="0"
+                                error={!!errors.stock}
+                                helperText={errors.stock}
+                                required
+                                inputProps={{ min: '0' }}
                             />
-                            {errors.stock && <span className="error-message">{errors.stock}</span>}
-                        </div>
-                    </div>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
 
-                    <div className="form-actions">
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={onClose}
-                            disabled={isSubmitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                <DialogActions sx={{ px: 3, py: 2 }}>
+                    <Button onClick={onClose} disabled={isSubmitting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSubmitting}
+                        startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
+                    >
+                        {isSubmitting ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
+                    </Button>
+                </DialogActions>
+            </form>
+        </Dialog>
     );
 }

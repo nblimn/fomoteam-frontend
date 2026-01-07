@@ -1,5 +1,16 @@
 import { Product } from '../types/Product';
-import { FiEdit2, FiTrash2, FiPackage } from 'react-icons/fi';
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Typography,
+    Button,
+    Chip,
+    Box,
+    Avatar,
+} from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon, Inventory as InventoryIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 
 interface ProductCardProps {
@@ -10,77 +21,113 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
     const getStockStatus = (stock: number) => {
-        if (stock === 0) return { label: 'Out of Stock', className: 'stock-out' };
-        if (stock < 10) return { label: 'Low Stock', className: 'stock-low' };
-        return { label: 'In Stock', className: 'stock-in' };
+        if (stock === 0) return { label: 'Out of Stock', color: 'error' as const };
+        if (stock < 10) return { label: 'Low Stock', color: 'warning' as const };
+        return { label: 'In Stock', color: 'success' as const };
     };
 
     const stockStatus = getStockStatus(product.stock);
 
     return (
-        <div className="product-card">
-            <div className="product-card-header">
-                <div className="product-icon">
-                    <FiPackage />
-                </div>
-                <span className={`stock-badge ${stockStatus.className}`}>
-                    {stockStatus.label}
-                </span>
-            </div>
+        <Card>
+            <CardHeader
+                avatar={
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                        <InventoryIcon />
+                    </Avatar>
+                }
+                action={
+                    <Chip
+                        label={stockStatus.label}
+                        color={stockStatus.color}
+                        size="small"
+                    />
+                }
+                title={
+                    <Typography variant="h6" component="div">
+                        {product.name}
+                    </Typography>
+                }
+            />
 
-            <div className="product-card-body">
-                <h3 className="product-name">{product.name}</h3>
+            <CardContent>
                 {product.description && (
-                    <p className="product-description">{product.description}</p>
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                            mb: 2,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {product.description}
+                    </Typography>
                 )}
 
-                <div className="product-details">
-                    <div className="detail-item">
-                        <span className="detail-label">Price</span>
-                        <span className="detail-value price">${product.price.toFixed(2)}</span>
-                    </div>
-                    <div className="detail-item">
-                        <span className="detail-label">Stock</span>
-                        <span className="detail-value">{product.stock} units</span>
-                    </div>
-                </div>
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 2,
+                        p: 2,
+                        bgcolor: 'rgba(99, 102, 241, 0.05)',
+                        borderRadius: 1,
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                    }}
+                >
+                    <Box>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                            PRICE
+                        </Typography>
+                        <Typography variant="h6" color="primary.main" fontWeight={600}>
+                            ${product.price.toFixed(2)}
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                            STOCK
+                        </Typography>
+                        <Typography variant="h6" fontWeight={600}>
+                            {product.stock} units
+                        </Typography>
+                    </Box>
+                </Box>
 
-                <div className="product-meta">
-                    <div className="meta-item">
-                        <span className="meta-label">Created:</span>
-                        <span className="meta-value">
-                            {format(new Date(product.createdAt), 'MMM dd, yyyy')}
-                        </span>
-                    </div>
+                <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                        Created: {format(new Date(product.createdAt), 'MMM dd, yyyy')}
+                    </Typography>
                     {product.updatedAt && (
-                        <div className="meta-item">
-                            <span className="meta-label">Updated:</span>
-                            <span className="meta-value">
-                                {format(new Date(product.updatedAt), 'MMM dd, yyyy')}
-                            </span>
-                        </div>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                            Updated: {format(new Date(product.updatedAt), 'MMM dd, yyyy')}
+                        </Typography>
                     )}
-                </div>
-            </div>
+                </Box>
+            </CardContent>
 
-            <div className="product-card-footer">
-                <button
-                    className="btn btn-secondary btn-icon"
+            <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                <Button
+                    variant="outlined"
+                    startIcon={<EditIcon />}
                     onClick={() => onEdit(product)}
-                    title="Edit product"
+                    fullWidth
+                    sx={{ mr: 1 }}
                 >
-                    <FiEdit2 />
-                    <span>Edit</span>
-                </button>
-                <button
-                    className="btn btn-danger btn-icon"
+                    Edit
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteIcon />}
                     onClick={() => onDelete(product)}
-                    title="Delete product"
+                    fullWidth
                 >
-                    <FiTrash2 />
-                    <span>Delete</span>
-                </button>
-            </div>
-        </div>
+                    Delete
+                </Button>
+            </CardActions>
+        </Card>
     );
 }
